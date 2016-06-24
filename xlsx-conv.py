@@ -49,7 +49,7 @@ def convertSheet(ws,outputPath):
         for row in ws.rows:
             c.writerow([cell.value for cell in row])
 
-wb = load_workbook(filename=inputPath, read_only=True)
+wb = load_workbook(filename=inputPath, read_only=True, data_only=True)
 ws_names = wb.get_sheet_names()
 
 for ws_name in ws_names:
