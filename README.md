@@ -1,4 +1,4 @@
-[![License](https://img.shields.io/github/license/ecommandeur/python-xlsx-conv.svg)]
+![License](https://img.shields.io/github/license/ecommandeur/python-xlsx-conv.svg)
 
 # xlsx-conv
 
