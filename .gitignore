@@ -1,0 +1,18 @@
+#
+# Ignore dirs PyInstaller creates
+#
+__pycache__
+build
+dist
+
+#
+# Ignore spec PyInstaller creates
+#
+xlsx-conv.spec
+
+#
+# Ignore csv outputted to resources
+#
+resources/*.txt
+resources/*.csv
+
