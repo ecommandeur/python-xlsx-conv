@@ -17,7 +17,7 @@ parser.add_argument('--encoding', help='Output encoding, defaults to utf-8', cho
 parser.add_argument('--extension', help='Extension of output, defaults to csv', default='csv')
 parser.add_argument('--noprefix', help='Do not prefix ouput with workbook name', nargs='?', const=1, default=0)
 parser.add_argument('--prefix', help='Use specified prefix instead of prefixing output with workbook name')
-parser.add_argument('--version', action='version', version='%(prog)s 1.0.0dev')
+parser.add_argument('--version', action='version', version='%(prog)s 1.0.0dev1')
 args = parser.parse_args()
 
 inputPath = args.input
