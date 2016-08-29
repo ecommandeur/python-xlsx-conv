@@ -1,5 +1,6 @@
 echo off
-python xlsx-conv.py -i "resources\Numbers.xlsx"
+REM python xlsx-conv.py -i "resources\Numbers.xlsx"
+python xlsx-conv.py -i "resources\Formulas.xlsx" --extension "txt"
 REM no prefix
 REM python xlsx-conv.py -i "resources\Numbers.xlsx" --noprefix
 REM custom prefix

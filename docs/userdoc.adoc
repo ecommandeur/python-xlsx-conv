@@ -1,0 +1,7 @@
+= xlsx-conv
+
+
+
+== FAQ
+
+What does the warning "UserWarning: Discarded range with reserved name" mean?
