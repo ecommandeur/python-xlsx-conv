@@ -1,7 +1,15 @@
 = xlsx-conv
 
+xlsx-conv is a commandline application for converting XLSX files to plain text delimiter separated files.
 
+Run xlsx-conv with -h to get help on the commandline options that xlsx-conv has.
+
+----
+ $ xlsx-conv -h
+----
 
 == FAQ
 
-What does the warning "UserWarning: Discarded range with reserved name" mean?
+=== What does the warning "UserWarning: Discarded range with reserved name" mean?
+
+See http://stackoverflow.com/questions/30169149/what-causes-userwarning-discarded-range-with-reserved-name-openpyxl[this answser at StackOverflow] : "It's supposed to be a friendly warning letting you know that some of the defined names are being lost when reading the file. Warnings in Python are not exceptions but informational notices." 

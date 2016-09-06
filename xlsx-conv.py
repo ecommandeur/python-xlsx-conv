@@ -1,4 +1,5 @@
 from openpyxl import load_workbook
+from time import strftime
 import argparse
 import csv
 import os
@@ -6,18 +7,18 @@ import os
 # ---
 # Get arguments
 # ---
-# TODO: let user specify more encodings
-# TODO: let user strip newlines from fields (replace by space)
+# see https://docs.python.org/3/howto/argparse.html 
 
-parser = argparse.ArgumentParser(description='Convert XLSX file to CSV using openpyxl')
-parser.add_argument('-i','--input', help='Full path to XLSX file', required=True)
-parser.add_argument('-o','--outputDir', help='Full path output directory')
+parser = argparse.ArgumentParser(description='Convert XLSX file to DSV using openpyxl')
+parser.add_argument('-i','--input', help='Path to XLSX file', required=True)
+parser.add_argument('-o','--outputDir', help='Path to output directory')
 parser.add_argument('--delimiter', help='Delimiter used in output, defaults to ,', choices=[',', ';', '|', 'tab'], default=',')
 parser.add_argument('--encoding', help='Output encoding, defaults to utf-8', choices=['ascii', 'latin-1', 'utf-8', 'utf-16'], default='utf-8')
 parser.add_argument('--extension', help='Extension of output, defaults to csv', default='csv')
-parser.add_argument('--noprefix', help='Do not prefix ouput with workbook name', nargs='?', const=1, default=0)
+parser.add_argument('--noprefix', help='Do not prefix ouput with workbook name', action="store_true")
 parser.add_argument('--prefix', help='Use specified prefix instead of prefixing output with workbook name')
-parser.add_argument('--version', action='version', version='%(prog)s 1.0.0dev1')
+parser.add_argument('--linebreak_replacement', help='Replace linebreaks in cells by replacement string')
+parser.add_argument('--version', action='version', version="%(prog)s 1.0.0")
 args = parser.parse_args()
 
 inputPath = args.input
@@ -27,6 +28,7 @@ customPrefix = args.prefix
 outputExtension = args.extension
 outputDelimiter = args.delimiter
 outputEncoding = args.encoding
+linebreakReplacement = args.linebreak_replacement
 
 if not os.path.isfile(inputPath):
     print('xlsx-conv: error: No such file or directory:', inputPath)
@@ -44,7 +46,7 @@ if outputDir:
 else:
    outputDir = inputDir
 
-print("Dumping", inputPath)
+print(strftime("%Y-%m-%d %H:%M:%S"), "- Converting", inputPath)
 
 # ---
 # Go ahead and dump that Workbook
@@ -56,7 +58,13 @@ def convertSheet(ws,outputPath):
     with open(outputPath, 'w', encoding=outputEncoding) as f:
         c = csv.writer(f, lineterminator='\n', delimiter=outputDelimiter)
         for row in ws.rows:
-            c.writerow([cell.value for cell in row])
+            values = []
+            for cell in row:
+                value = cell.value
+                if linebreakReplacement is not None and isinstance(value, str):
+                    value = value.replace('\r\n', linebreakReplacement).replace('\n', linebreakReplacement).replace('\r', linebreakReplacement)
+                values.append(value)
+            c.writerow(values)
 
 # load workbook and invoke convertSheet for all sheets in workbook
 
@@ -72,7 +80,7 @@ ws_names = wb.get_sheet_names()
 outputPrefix = inputBaseFn + '.'
 if customPrefix:
     outputPrefix = customPrefix + '.' # override with custom prefix
-if noPrefix == 1:
+if noPrefix == True:
     outputPrefix = '' # noprefix takes precedence over customPrefix
 
 if outputDelimiter == 'tab':
@@ -81,7 +89,7 @@ if outputDelimiter == 'tab':
 for ws_name in ws_names:
     ws = wb[ws_name] # ws is now an IterableWorksheet
     outputPath = outputDir + os.sep + outputPrefix + ws_name + '.' + outputExtension
-    print("Outputting sheet to", outputPath)
+    print(strftime("%Y-%m-%d %H:%M:%S"), "- Outputting sheet to", outputPath)
     try:
         convertSheet(ws,outputPath)
     except Exception as e:
@@ -89,4 +97,4 @@ for ws_name in ws_names:
         print(e)
         exit(1) 
 
-print("bye!")
+print(strftime("%Y-%m-%d %H:%M:%S"), "- bye!")
