@@ -17,8 +17,10 @@ parser.add_argument('--encoding', help='Output encoding, defaults to utf-8', cho
 parser.add_argument('--extension', help='Extension of output, defaults to csv', default='csv')
 parser.add_argument('--noprefix', help='Do not prefix ouput with workbook name', action="store_true")
 parser.add_argument('--prefix', help='Use specified prefix instead of prefixing output with workbook name')
+parser.add_argument('--quotechar', help='One-character string used to quote fields containing special characters', default='"')
+parser.add_argument('--quoting', help='Controls field quoting, defaults to MINIMAL', choices=['ALL', 'MINIMAL', 'NONE', 'NONNUMERIC'], default='MINIMAL')
 parser.add_argument('--linebreak_replacement', help='Replace linebreaks in cells by replacement string')
-parser.add_argument('--version', action='version', version="%(prog)s 1.0.0")
+parser.add_argument('--version', action='version', version="%(prog)s 1.1.0dev")
 args = parser.parse_args()
 
 inputPath = args.input
@@ -28,6 +30,8 @@ customPrefix = args.prefix
 outputExtension = args.extension
 outputDelimiter = args.delimiter
 outputEncoding = args.encoding
+outputQuoteChar = args.quotechar
+outputQuoting = args.quoting
 linebreakReplacement = args.linebreak_replacement
 
 if not os.path.isfile(inputPath):
@@ -46,6 +50,14 @@ if outputDir:
 else:
    outputDir = inputDir
 
+quoteStyle = csv.QUOTE_MINIMAL
+if outputQuoting == "ALL":
+    quoteStyle = csv.QUOTE_ALL
+elif outputQuoting == "NONE":
+    quoteStyle = csv.QUOTE_NONE
+elif outputQuoting == "NONNUMERIC":
+    quoteStyle = csv.QUOTE_NONNUMERIC
+
 print(strftime("%Y-%m-%d %H:%M:%S"), "- Converting", inputPath)
 
 # ---
@@ -56,7 +68,7 @@ print(strftime("%Y-%m-%d %H:%M:%S"), "- Converting", inputPath)
 
 def convertSheet(ws,outputPath):
     with open(outputPath, 'w', encoding=outputEncoding) as f:
-        c = csv.writer(f, lineterminator='\n', delimiter=outputDelimiter)
+        c = csv.writer(f, lineterminator='\n', delimiter=outputDelimiter, quotechar=outputQuoteChar, quoting=quoteStyle)
         for row in ws.rows:
             values = []
             for cell in row:

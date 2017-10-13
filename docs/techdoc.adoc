@@ -1,0 +1,12 @@
+= xlsx-conv technical documentation
+
+== Setting up a dev environment
+
+* Install Anaconda
+* Create a conda environment from environment.yml . See https://conda.io/docs/user-guide/tasks/manage-environments.html#creating-an-environment-from-an-environment-yml-file .
+
+NOTE: enviroment.yml was created on a Windows system
+
+== Building stand-alone xlsx-conv binaries
+
+Stand-alone binaries can be created using PyInstaller ( http://www.pyinstaller.org/ ).

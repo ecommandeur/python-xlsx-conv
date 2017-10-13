@@ -18,3 +18,4 @@ python xlsx-conv.py -i "resources\Range.xlsx" -o "temp" --encoding "ascii" --ext
 python xlsx-conv.py -i "resources\Range.xlsx" -o "temp" --noprefix
 python xlsx-conv.py -i "resources\Range.xlsx" -o "temp" --prefix "R"
 python xlsx-conv.py -i "temp\Characters.xlsx" --extension "lr.csv" --linebreak_replacement " "
+python xlsx-conv.py -i "temp\Characters.xlsx" --extension "q.csv" --quoting "ALL"
