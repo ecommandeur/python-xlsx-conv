@@ -1,5 +1,5 @@
 #
-# Ignore dirs PyInstaller creates
+# Ignore dirs
 #
 __pycache__
 build
@@ -17,3 +17,7 @@ xlsx-conv.spec
 resources/*.txt
 resources/*.csv
 
+#
+# Ignore files
+#
+*.bak

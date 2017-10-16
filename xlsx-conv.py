@@ -12,27 +12,35 @@ import os
 parser = argparse.ArgumentParser(description='Convert XLSX file to DSV using openpyxl')
 parser.add_argument('-i','--input', help='Path to XLSX file', required=True)
 parser.add_argument('-o','--outputDir', help='Path to output directory')
+parser.add_argument('--col_index', help='Generate column indices (c1,c2,etc) as first line in output', action="store_true")
 parser.add_argument('--delimiter', help='Delimiter used in output, defaults to ,', choices=[',', ';', '|', 'tab'], default=',')
 parser.add_argument('--encoding', help='Output encoding, defaults to utf-8', choices=['ascii', 'latin-1', 'utf-8', 'utf-16'], default='utf-8')
 parser.add_argument('--extension', help='Extension of output, defaults to csv', default='csv')
+parser.add_argument('--linebreak_replacement', help='Replace linebreaks in cells by replacement string')
 parser.add_argument('--noprefix', help='Do not prefix ouput with workbook name', action="store_true")
 parser.add_argument('--prefix', help='Use specified prefix instead of prefixing output with workbook name')
+parser.add_argument('--row_index', help='Write row numbers as first column in output', action="store_true")
 parser.add_argument('--quotechar', help='One-character string used to quote fields containing special characters', default='"')
 parser.add_argument('--quoting', help='Controls field quoting, defaults to MINIMAL', choices=['ALL', 'MINIMAL', 'NONE', 'NONNUMERIC'], default='MINIMAL')
-parser.add_argument('--linebreak_replacement', help='Replace linebreaks in cells by replacement string')
-parser.add_argument('--version', action='version', version="%(prog)s 1.1.0dev")
+parser.add_argument('--version', action='version', version="%(prog)s 1.1.0")
 args = parser.parse_args()
 
-inputPath = args.input
-outputDir = args.outputDir
-noPrefix = args.noprefix
-customPrefix = args.prefix
-outputExtension = args.extension
-outputDelimiter = args.delimiter
-outputEncoding = args.encoding
-outputQuoteChar = args.quotechar
-outputQuoting = args.quoting
-linebreakReplacement = args.linebreak_replacement
+inputPath               = args.input
+inputPath               = args.input
+inputPath               = args.input
+outputDir               = args.outputDir
+outputDir               = args.outputDir
+
+colIndex                = args.col_index 
+outputDelimiter         = args.delimiter 
+outputEncoding          = args.encoding 
+outputExtension         = args.extension 
+linebreakReplacement    = args.linebreak_replacement
+noPrefix                = args.noprefix
+customPrefix            = args.prefix
+rowIndex                = args.row_index
+outputQuoteChar         = args.quotechar
+outputQuoting           = args.quoting
 
 if not os.path.isfile(inputPath):
     print('xlsx-conv: error: No such file or directory:', inputPath)
@@ -58,19 +66,34 @@ elif outputQuoting == "NONE":
 elif outputQuoting == "NONNUMERIC":
     quoteStyle = csv.QUOTE_NONNUMERIC
 
-print(strftime("%Y-%m-%d %H:%M:%S"), "- Converting", inputPath)
-
 # ---
 # Go ahead and dump that Workbook
 # ---
+
+print(strftime("%Y-%m-%d %H:%M:%S"), "- Converting", inputPath)
 
 # convert sheet function
 
 def convertSheet(ws,outputPath):
     with open(outputPath, 'w', encoding=outputEncoding) as f:
         c = csv.writer(f, lineterminator='\n', delimiter=outputDelimiter, quotechar=outputQuoteChar, quoting=quoteStyle)
-        for row in ws.rows:
+
+        # if col_index is set then first generate column index record
+        col_offset = 1
+        if rowIndex == True:
+            col_offset = 0
+        if colIndex == True:
+            first_row = list(ws.rows)[0]
+            col_index = []
+            for i in range(len(first_row)):
+                c_val = "c" + str(i+col_offset)
+                col_index.append(c_val)
+            c.writerow(col_index)
+
+        for index, row in enumerate(ws.rows):
             values = []
+            if rowIndex == True:
+                values.append(index+1)
             for cell in row:
                 value = cell.value
                 if linebreakReplacement is not None and isinstance(value, str):
@@ -78,7 +101,9 @@ def convertSheet(ws,outputPath):
                 values.append(value)
             c.writerow(values)
 
+# ---
 # load workbook and invoke convertSheet for all sheets in workbook
+# ---
 
 try:
     wb = load_workbook(filename=inputPath, read_only=True, data_only=True)
