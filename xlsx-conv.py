@@ -79,14 +79,13 @@ def convertSheet(ws,outputPath):
         c = csv.writer(f, lineterminator='\n', delimiter=outputDelimiter, quotechar=outputQuoteChar, quoting=quoteStyle)
 
         # if col_index is set then first generate column index record
-        col_offset = 1
-        if rowIndex == True:
-            col_offset = 0
         if colIndex == True:
             first_row = list(ws.rows)[0]
             col_index = []
+            if rowIndex == True:
+                col_index.append("c0") # if row_index is also set then include additional column
             for i in range(len(first_row)):
-                c_val = "c" + str(i+col_offset)
+                c_val = "c" + str(i+1)
                 col_index.append(c_val)
             c.writerow(col_index)
 

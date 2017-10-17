@@ -4,7 +4,7 @@
 
 Setting up a dev enviroment for xlsx-conv version 1.1+ using Anaconda.
 
-* Install Anaconda with Python 3.6+
+* Install Anaconda with Python 3.6+ (1.1.0 is built with Python 3.6.3)
 
 * Create an environment 
 +
@@ -24,14 +24,16 @@ Version 1.1.0 is built with openpyxl 2.4.8 and Python 3.6
 ----
 > conda install -n xlsx-conv pip
 > activate xlsx-conv
-> pip install pyinstaller
+> pip install pyinstaller=3.3
 ----
 
-When running pyinstaller it will notify about any OS specific dependencies that are missing
+When running pyinstaller it will notify about any OS specific dependencies that are missing and prompt to install them.
 
-NOTE: Conda can create an enviroment.yml but that does not seem to be portable over systems. Since there are only a few commands that need to be run for setting up an environment the separate commands are document here.
+NOTE: Conda can create an enviroment.yml but that does not seem to be portable over systems. Therefore, the separate commands for setting up a dev environment are document here.
 
-NOTE: Version 1.0.0 was build with python 3.5 and openpyxl 2.3.2.
+*Historical*
+
+* Version 1.0.0 was build with python 3.5, openpyxl 2.3.2, and pyinstaller 3.2
 
 == Building stand-alone xlsx-conv binaries
 
