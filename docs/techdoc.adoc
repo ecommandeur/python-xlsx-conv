@@ -15,19 +15,26 @@ Setting up a dev enviroment for xlsx-conv version 1.1+ using Anaconda.
 * Install runtime dependencies
 +
 ----
-> conda install -n xlsx-conv openpyxl=2.4.8
+> conda install -n xlsx-conv openpyxl=2.5.0
 ----
-Version 1.1.0 is built with openpyxl 2.4.8 and Python 3.6
++
+Search with conda to find the latest available version of openpyxl. Check the openpyxl docs for the latest stable version.
++
+----
+> conda search -f openpyxl
+----
++
+Version 1.2.0 is built with Python 3.6.4, openpyxl 2.5.0 and PyInstaller 3.3.1
 
 * Install build time dependencies
 +
 ----
 > conda install -n xlsx-conv pip
 > activate xlsx-conv
-> pip install pyinstaller==3.3
+> pip install pyinstaller==3.3.1
 ----
 
-When running pyinstaller it will notify about any OS specific dependencies that are missing and prompt to install them.
+When running PyInstaller it may notify about any OS specific dependencies that are missing and prompt to install them.
 
 On Linux PyInstaller needs a CPython build with "--enable-shared". It seems Anaconda cannot provide that. Not clear what is the easiest way to get that to work. Pyenv can build a so-called framework enabled version of Python 3.6.3. That does require all build dependencies to be installed.
 
@@ -42,7 +49,8 @@ NOTE: Conda can create an enviroment.yml but that does not seem to be portable o
 
 *Historical*
 
-* Version 1.0.0 was build with python 3.5, openpyxl 2.3.2, and pyinstaller 3.2
+* Version 1.1.0 was built with Python 3.6.3, openpyxl 2.4.8, and PyInstaller 3.3
+* Version 1.0.0 was build with Python 3.5, openpyxl 2.3.2, and PyInstaller 3.2
 
 == Building stand-alone xlsx-conv binaries
 

@@ -22,7 +22,7 @@ parser.add_argument('--prefix', help='Use specified prefix instead of prefixing 
 parser.add_argument('--row_index', help='Write row numbers as first column in output', action="store_true")
 parser.add_argument('--quotechar', help='One-character string used to quote fields containing special characters', default='"')
 parser.add_argument('--quoting', help='Controls field quoting, defaults to MINIMAL', choices=['ALL', 'MINIMAL', 'NONE', 'NONNUMERIC'], default='MINIMAL')
-parser.add_argument('--version', action='version', version="%(prog)s 1.1.0")
+parser.add_argument('--version', action='version', version="%(prog)s 1.2.0-SNAPSHOT")
 args = parser.parse_args()
 
 inputPath               = args.input
@@ -77,6 +77,8 @@ print(strftime("%Y-%m-%d %H:%M:%S"), "- Converting", inputPath)
 def convertSheet(ws,outputPath):
     with open(outputPath, 'w', encoding=outputEncoding) as f:
         c = csv.writer(f, lineterminator='\n', delimiter=outputDelimiter, quotechar=outputQuoteChar, quoting=quoteStyle)
+        
+        # TODO check if there is a first row in ws.rows 
 
         # if col_index is set then first generate column index record
         if colIndex == True:
@@ -111,7 +113,7 @@ except Exception as e:
     print(e)
     exit(1)
     
-ws_names = wb.get_sheet_names()
+ws_names = wb.sheetnames
 
 outputPrefix = inputBaseFn + '.'
 if customPrefix:
