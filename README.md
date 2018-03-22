@@ -2,4 +2,4 @@
 
 # xlsx-conv
 
-Python script for converting XLSX to Delimiter Separated Values text. Leverages the power of OpenPyXL (http://openpyxl.readthedocs.io/en/default/). 
+Python script for converting Microsoft Excel Open XML Format Spreadsheets (XLSX files) to Delimiter Separated Values text. Leverages the power of OpenPyXL (http://openpyxl.readthedocs.io/en/default/). 

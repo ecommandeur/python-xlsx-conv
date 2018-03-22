@@ -1,5 +1,6 @@
 from openpyxl import load_workbook
 from time import strftime
+from itertools import islice
 import argparse
 import csv
 import os
@@ -78,11 +79,23 @@ def convertSheet(ws,outputPath):
     with open(outputPath, 'w', encoding=outputEncoding) as f:
         c = csv.writer(f, lineterminator='\n', delimiter=outputDelimiter, quotechar=outputQuoteChar, quoting=quoteStyle)
         
-        # TODO check if there is a first row in ws.rows 
+        ## First check if there is are rows in ws.rows 
+        first_row_slice = list(islice(ws.rows,1))
+        if len(first_row_slice) == 0:
+            return
+        #lrows = list(ws.rows)
+        #if len(lrows) == 0:
+        #    return
+
+
+        #print("len test ", len(test))
+        #print("test is ", test)
 
         # if col_index is set then first generate column index record
+        # TODO what happens if row index is set, but column index is not ...
         if colIndex == True:
-            first_row = list(ws.rows)[0]
+            #first_row = lrows[0]
+            first_row =  first_row_slice[0]
             col_index = []
             if rowIndex == True:
                 col_index.append("c0") # if row_index is also set then include additional column
