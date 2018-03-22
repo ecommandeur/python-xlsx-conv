@@ -48,6 +48,7 @@ if not os.path.isfile(inputPath):
     parser.print_usage()
     exit(1)
 
+inputPath = os.path.realpath(inputPath)
 inputDir, inputFile = os.path.split(inputPath)
 inputBaseFn, inputExt = os.path.splitext(inputFile)
 
@@ -74,27 +75,18 @@ elif outputQuoting == "NONNUMERIC":
 print(strftime("%Y-%m-%d %H:%M:%S"), "- Converting", inputPath)
 
 # convert sheet function
+#  If row index is set, but column index is not then an index is just inserted before each record
 
 def convertSheet(ws,outputPath):
     with open(outputPath, 'w', encoding=outputEncoding) as f:
         c = csv.writer(f, lineterminator='\n', delimiter=outputDelimiter, quotechar=outputQuoteChar, quoting=quoteStyle)
         
-        ## First check if there is are rows in ws.rows 
+        # First check if there is are rows in ws.rows 
         first_row_slice = list(islice(ws.rows,1))
         if len(first_row_slice) == 0:
             return
-        #lrows = list(ws.rows)
-        #if len(lrows) == 0:
-        #    return
 
-
-        #print("len test ", len(test))
-        #print("test is ", test)
-
-        # if col_index is set then first generate column index record
-        # TODO what happens if row index is set, but column index is not ...
         if colIndex == True:
-            #first_row = lrows[0]
             first_row =  first_row_slice[0]
             col_index = []
             if rowIndex == True:
