@@ -56,7 +56,7 @@ NOTE: Conda can create an enviroment.yml but that does not seem to be portable o
 
 Stand-alone binaries can be created using PyInstaller ( http://www.pyinstaller.org/ ).
 
-In the root of the project run:
+Make sure to first activate the conda environment for xlsx-conv. In the root of the project run:
 
 ----
 > pyinstaller -F xlsx-conv.py
