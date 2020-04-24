@@ -24,7 +24,8 @@ parser.add_argument('--prefix', help='Use specified prefix instead of prefixing 
 parser.add_argument('--row_index', help='Write row numbers as first column in output', action="store_true")
 parser.add_argument('--quotechar', help='One-character string used to quote fields containing special characters', default='"')
 parser.add_argument('--quoting', help='Controls field quoting, defaults to MINIMAL', choices=['ALL', 'MINIMAL', 'NONE', 'NONNUMERIC'], default='MINIMAL')
-parser.add_argument('--version', action='version', version="%(prog)s 1.3.0")
+parser.add_argument('--sheet', help='Name of sheet to convert')
+parser.add_argument('--version', action='version', version="%(prog)s 1.4.0-beta")
 args = parser.parse_args()
 
 # ---
@@ -46,7 +47,7 @@ PREFIX = "prefix"
 ROW_INDEX = "row_index"
 QUOTECHAR = "quotechar"
 QUOTING = "quoting"
-
+SHEET = "sheet"
 
 # ---
 # ARGUMENT HANDLING
@@ -90,6 +91,8 @@ if inputExt.lower() == ".txt":
             indexOutputDir = lowerCaseHeaders.index(OUTPUT_DIR)
         if PREFIX in lowerCaseHeaders:
             indexPrefix = lowerCaseHeaders.index(PREFIX)
+        if SHEET in lowerCaseHeaders:
+            indexSheet = lowerCaseHeaders.index(SHEET)
         for row in csv_reader:
             inputDict = {}
             inputDict[INPUT_PATH] = row[indexInput]
@@ -103,6 +106,10 @@ if inputExt.lower() == ".txt":
                 inputDict[PREFIX] = row[indexPrefix]
             else:
                 inputDict[PREFIX] = args.prefix
+            if indexSheet >= 0:
+                inputDict[SHEET] = row[indexSheet]
+            else:
+                inputDict[SHEET] = None
             # other 
             # makes sense to have these consistent for all converted output
             inputDict[COL_INDEX] = args.col_index
@@ -132,6 +139,7 @@ if inputExt.lower() != ".txt":
     inputDict[ROW_INDEX] = args.row_index
     inputDict[QUOTECHAR] = args.quotechar
     inputDict[QUOTING] = args.quoting
+    inputDict[SHEET] = args.sheet
     inputList.append(inputDict)
 
 # ---
@@ -204,6 +212,13 @@ def convertWorkbook(argDict):
         sys.exit(1)
 
     ws_names = wb.sheetnames
+    if argDict[SHEET]:
+        if(argDict[SHEET] in ws_names):
+            print('Only extracting sheet', argDict[SHEET])
+            ws_names = [argDict[SHEET]]
+        else:
+            print('Error: Cannot find sheet ', argDict[SHEET])
+            sys.exit(1)
     outputPrefix = argDict[INPUT_BASE_FN] + '.'
     if argDict[PREFIX]:
         outputPrefix = argDict[PREFIX] + '.' # override with custom prefix
