@@ -19,3 +19,8 @@ python xlsx-conv.py -i "resources\Range.xlsx" -o "temp" --noprefix
 python xlsx-conv.py -i "resources\Range.xlsx" -o "temp" --prefix "R"
 python xlsx-conv.py -i "temp\Characters.xlsx" --extension "lr.csv" --linebreak_replacement " "
 python xlsx-conv.py -i "temp\Characters.xlsx" --extension "q.csv" --quoting "ALL"
+REM loading input from file
+python xlsx-conv.py -i "resources\Input_OutputDir.txt" -o "temp"
+REM graceful error upon missing input
+python xlsx-conv.py -i "resources\NonExistent.txt" -o "temp"
+python xlsx-conv.py -i "resources\NonExistent.xlsx" -o "temp"

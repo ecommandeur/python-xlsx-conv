@@ -52,6 +52,139 @@ NOTE: Conda can create an enviroment.yml but that does not seem to be portable o
 * Version 1.1.0 was built with Python 3.6.3, openpyxl 2.4.8, and PyInstaller 3.3
 * Version 1.0.0 was build with Python 3.5, openpyxl 2.3.2, and PyInstaller 3.2
 
+== Setting up a Linux dev environment on Windows
+
+Download and install the latest version of Vagrant via the installer (64-bit or 32-bit). The system will need to reboot after installing Vagrant.
+
+Download and install the latest version of VirtualBox. VirtualBox is necessary as a Vagrant provider.
+
+IMPORTANT: VirtualBox requires Hyper-V to be enabled on your Windows machine
+
+To test if Vagrant has installed succesfully, open up a command prompt and type
+
+----
+> vagrant version
+----
+
+This should echo sth like
+
+```
+Installed Version: 2.2.7
+Latest Version: 2.2.7
+
+You're running an up-to-date version of Vagrant!
+```
+
+If Vagrant has installed currectly then proceed by adding a Vagrant Box. Search for the latest Ubuntu box (or the Linux distro of your preference) on https://app.vagrantup.com/boxes/search
+
+----
+> vagrant box add ubuntu/xenial64
+----
+
+Go to the directory in which you want to initialize the vagrant box. It is usefull to create a VagrantEnv dir, somewhere you can easily find it. If you are planning to create more environments create a subdir per environment.
+
+----
+> vagrant init ubuntu/xenial64
+----
+
+This will create a Vagrant file in the directory in which you ran vagrant init.
+
+In this vagrant file, look for the setting `config.vm.synced_folder` and set that to a folder from which you can access your source code.
+
+Bring the environment up by running
+
+----
+> vagrant up
+----
+
+Login to the machine via
+
+----
+> vagrant ssh
+----
+
+Vagrant does not play nice with the OpenSSH that is included with Windows 10, so you may need to uninstall that feature.
+
+Once we have Vagrant running we need to setup a dev environment. The challenge is that we need a Python with the --enable-shared option.
+
+Install dependencies first
+
+```
+$ sudo apt-get update && sudo apt-get upgrade
+$ apt-get install -y make build-essential libssl-dev zlib1g-dev libbz2-dev libreadline-dev libsqlite3-dev wget curl llvm libncurses5-dev git
+```
+
+Then install pyenv
+
+```
+curl -L https://raw.githubusercontent.com/yyuu/pyenv-installer/master/bin/pyenv-installer | bash
+
+```
+
+Subsequently add the following at the following at the end of your .bashrc file
+
+```
+export PATH="~/.pyenv/bin:$PATH"
+eval "$(pyenv init -)"
+eval "$(pyenv virtualenv-init -)"
+```
+
+Quit the ssh session and connect anew, to load the new .bashrc settings.
+
+Now you should be able to install Python 3.7.7 with the option --enabled-shared using pyenv
+
+```
+$ env PYTHON_CONFIGURE_OPTS="--enable-shared" pyenv install 3.7.7
+```
+
+Full path to pyenv will be `/home/vagrant/.pyenv/bin/`
+
+Pyenv will install 3.7.7 under `~/.pyenv/versions/3.7.7`.
+
+Set 3.7.7 as the global Python version
+
+```
+$ pyenv global 3.7.7
+```
+
+Check using
+
+```
+python --version
+```
+
+Now we are ready to create a virtual environment
+
+
+```
+python -m venv ~/xlsx-conv-env
+```
+
+Activate the environment using
+
+```
+source ~/xlsx-conv-env/bin/activate
+```
+
+Into this environment we want to install the latest versions of openpyxl and pyinstaller
+
+```
+pip install openpyxl
+pin install pyinstaller
+```
+
+As of writing the latest version op openpyxl is 3.0.3
+and the latest version of pyinstaller is 3.6
+
+Change the directory to where your source code lives and run pyinstaller with -F to build xlsx-conv to a single file
+
+```
+$ pyinstaller xlsx-conv.py -F
+```
+
+NOTE: It seems WSL 2 could be an alternative for Vagrant. WSL = Windows Subsystem for Linux. WSL 2 has the goal of providing full system call compatibility
+
+
 == Building stand-alone xlsx-conv binaries
 
 Stand-alone binaries can be created using PyInstaller ( http://www.pyinstaller.org/ ).

@@ -159,6 +159,8 @@ def convertSheet(ws,outputPath,argDict):
     linebreakReplacement = argDict[LINEBREAK_REPLACEMENT]
     colIndex = argDict[COL_INDEX]
     rowIndex = argDict[ROW_INDEX]
+    
+    print(strftime("%Y-%m-%d %H:%M:%S"), "- Outputting sheet to", outputPath)
     with open(outputPath, 'w', encoding=outputEncoding) as f:
         c = csv.writer(f, lineterminator='\n', delimiter=outputDelimiter, quotechar=outputQuoteChar, quoting=quoteStyle)
         
@@ -210,13 +212,12 @@ def convertWorkbook(argDict):
     for ws_name in ws_names:
         ws = wb[ws_name] # ws is an IterableWorksheet
         outputPath = outputDir + os.sep + outputPrefix + ws_name + '.' + argDict[EXTENSION]
-        print(strftime("%Y-%m-%d %H:%M:%S"), "- Outputting sheet to", outputPath)
-    try:
-        convertSheet(ws,outputPath,argDict)
-    except Exception as e:
-        print('Error: Failed to convert sheet\n')
-        print(e)
-        sys.exit(1) 
+        try:
+            convertSheet(ws,outputPath,argDict)
+        except Exception as e:
+            print('Error: Failed to convert sheet\n')
+            print(e)
+            sys.exit(1) 
 
 
 # ---
