@@ -1,4 +1,5 @@
 from openpyxl import load_workbook
+from openpyxl.utils import get_column_letter
 from time import strftime
 from itertools import islice
 import argparse
@@ -19,12 +20,17 @@ parser.add_argument('--delimiter', help='Delimiter used in output, defaults to ,
 parser.add_argument('--encoding', help='Output encoding, defaults to utf-8', choices=['ascii', 'latin-1', 'utf-8', 'utf-16'], default='utf-8')
 parser.add_argument('--extension', help='Extension of output, defaults to csv', default='csv')
 parser.add_argument('--linebreak_replacement', help='Replace linebreaks in cells by replacement string')
+# TODO add colrange e.g. 10:20 to convert only columns 10 to 20 (maybe also allow J:T ?)
+# TODO add rowrange e.g. 10:20 to convert only rows 10 to 20
+parser.add_argument('--max_cols', type=int, help="Maximum number of columns", default=-1)
 parser.add_argument('--noprefix', help='Do not prefix ouput with workbook name', action="store_true")
 parser.add_argument('--prefix', help='Use specified prefix instead of prefixing output with workbook name')
 parser.add_argument('--row_index', help='Write row numbers as first column in output', action="store_true")
 parser.add_argument('--quotechar', help='One-character string used to quote fields containing special characters', default='"')
 parser.add_argument('--quoting', help='Controls field quoting, defaults to MINIMAL', choices=['ALL', 'MINIMAL', 'NONE', 'NONNUMERIC'], default='MINIMAL')
 parser.add_argument('--sheet', help='Name of sheet to convert')
+# TODO add option to echo sheetnames and maybe some metadata about sheets (sheetinfo)
+# print (wb.sheetnames)
 parser.add_argument('--version', action='version', version="%(prog)s 1.4.0-beta")
 args = parser.parse_args()
 
@@ -33,21 +39,26 @@ args = parser.parse_args()
 # ---
 # used as keys in arg dictionary
 
+# arguments taken either from commandline or TXT input
 INPUT_PATH = "inputpath"
 INPUT_BASE_FN = "inputbasefn"
 OUTPUT_DIR = "outputdir"
-# other
+SHEET = "sheet"
+
+# shared arguments
+# these will be the same for each row in inputList
 COL_INDEX = 'col_index'
 DELIMITER = 'delimiter'
 ENCODING = "encoding"
 EXTENSION = "extension"
 LINEBREAK_REPLACEMENT = 'linebreak_replacement'
+MAX_COLS = 'max_cols'
 NO_PREFIX = "noprefix"
 PREFIX = "prefix"
 ROW_INDEX = "row_index"
 QUOTECHAR = "quotechar"
 QUOTING = "quoting"
-SHEET = "sheet"
+
 
 # ---
 # ARGUMENT HANDLING
@@ -110,17 +121,6 @@ if inputExt.lower() == ".txt":
                 inputDict[SHEET] = row[indexSheet]
             else:
                 inputDict[SHEET] = None
-            # other 
-            # makes sense to have these consistent for all converted output
-            inputDict[COL_INDEX] = args.col_index
-            inputDict[DELIMITER] = args.delimiter
-            inputDict[ENCODING] = args.encoding
-            inputDict[EXTENSION] = args.extension
-            inputDict[LINEBREAK_REPLACEMENT] = args.linebreak_replacement
-            inputDict[NO_PREFIX] = args.noprefix
-            inputDict[ROW_INDEX] = args.row_index
-            inputDict[QUOTECHAR] = args.quotechar
-            inputDict[QUOTING] = args.quoting
             inputList.append(inputDict)
 
 if inputExt.lower() != ".txt":
@@ -128,17 +128,7 @@ if inputExt.lower() != ".txt":
     # input/output
     inputDict[INPUT_PATH] = inputPath
     inputDict[OUTPUT_DIR] = args.outputDir
-    # other
-    inputDict[COL_INDEX] = args.col_index
-    inputDict[DELIMITER] = args.delimiter
-    inputDict[ENCODING] = args.encoding
-    inputDict[EXTENSION] = args.extension
-    inputDict[LINEBREAK_REPLACEMENT] = args.linebreak_replacement
-    inputDict[NO_PREFIX] = args.noprefix
     inputDict[PREFIX] = args.prefix
-    inputDict[ROW_INDEX] = args.row_index
-    inputDict[QUOTECHAR] = args.quotechar
-    inputDict[QUOTING] = args.quoting
     inputDict[SHEET] = args.sheet
     inputList.append(inputDict)
 
@@ -167,15 +157,24 @@ def convertSheet(ws,outputPath,argDict):
     linebreakReplacement = argDict[LINEBREAK_REPLACEMENT]
     colIndex = argDict[COL_INDEX]
     rowIndex = argDict[ROW_INDEX]
+    maxColumns = argDict[MAX_COLS]
     
-    print(strftime("%Y-%m-%d %H:%M:%S"), "- Outputting sheet to", outputPath)
     with open(outputPath, 'w', encoding=outputEncoding) as f:
         c = csv.writer(f, lineterminator='\n', delimiter=outputDelimiter, quotechar=outputQuoteChar, quoting=quoteStyle)
         
-        # First check if there is are rows in ws.rows 
+        # First check if there are rows in ws.rows 
+        # The sheet may be empty
         first_row_slice = list(islice(ws.rows,1))
         if len(first_row_slice) == 0:
+            print(strftime("%Y-%m-%d %H:%M:%S"), "- Skipped", ws.title, "since it is empty")
             return
+
+        first_row = first_row_slice[0]
+        numcols = len(first_row)
+        if maxColumns > -1:
+            if numcols > maxColumns:
+                numcols = maxColumns
+                print(strftime("%Y-%m-%d %H:%M:%S"), "- Limiting output to", numcols + 1, "columns")
 
         if colIndex == True:
             first_row =  first_row_slice[0]
@@ -187,11 +186,13 @@ def convertSheet(ws,outputPath,argDict):
                 col_index.append(c_val)
             c.writerow(col_index)
 
+        print(strftime("%Y-%m-%d %H:%M:%S"), "- Outputting converted sheet to", outputPath)
         for index, row in enumerate(ws.rows):
             values = []
             if rowIndex == True:
                 values.append(index+1)
-            for cell in row:
+            for colnum in range(numcols):
+                cell = row[colnum]
                 value = cell.value
                 if linebreakReplacement is not None and isinstance(value, str):
                     value = value.replace('\r\n', linebreakReplacement).replace('\n', linebreakReplacement).replace('\r', linebreakReplacement)
@@ -214,7 +215,7 @@ def convertWorkbook(argDict):
     ws_names = wb.sheetnames
     if argDict[SHEET]:
         if(argDict[SHEET] in ws_names):
-            print('Only extracting sheet', argDict[SHEET])
+            print(strftime("%Y-%m-%d %H:%M:%S"),' - Only extracting sheet', argDict[SHEET])
             ws_names = [argDict[SHEET]]
         else:
             print('Error: Cannot find sheet ', argDict[SHEET])
@@ -259,6 +260,18 @@ for d in inputList:
     # enrich dict
     d[INPUT_BASE_FN] = inputBaseFn
     d[OUTPUT_DIR] = outputDir
+
+    # shared args
+    d[COL_INDEX] = args.col_index
+    d[DELIMITER] = args.delimiter
+    d[ENCODING] = args.encoding
+    d[EXTENSION] = args.extension
+    d[LINEBREAK_REPLACEMENT] = args.linebreak_replacement
+    d[MAX_COLS] = args.max_cols - 1
+    d[NO_PREFIX] = args.noprefix
+    d[ROW_INDEX] = args.row_index
+    d[QUOTECHAR] = args.quotechar
+    d[QUOTING] = args.quoting
 
     # call convert workbook
     convertWorkbook(d)
