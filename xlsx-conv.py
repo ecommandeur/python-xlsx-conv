@@ -174,14 +174,15 @@ def convertSheet(ws,outputPath,argDict):
         if maxColumns > -1:
             if numcols > maxColumns:
                 numcols = maxColumns
-                print(strftime("%Y-%m-%d %H:%M:%S"), "- Limiting output to", numcols + 1, "columns")
+                print(strftime("%Y-%m-%d %H:%M:%S"), "- Limiting output to", numcols, "columns")
 
+        # We iterate over range(numcols), e.g. range(3) will give [0,1,2]
         if colIndex == True:
             first_row =  first_row_slice[0]
             col_index = []
             if rowIndex == True:
                 col_index.append("c0") # if row_index is also set then include additional column
-            for i in range(len(first_row)):
+            for i in range(numcols):
                 c_val = "c" + str(i+1)
                 col_index.append(c_val)
             c.writerow(col_index)
@@ -267,7 +268,7 @@ for d in inputList:
     d[ENCODING] = args.encoding
     d[EXTENSION] = args.extension
     d[LINEBREAK_REPLACEMENT] = args.linebreak_replacement
-    d[MAX_COLS] = args.max_cols - 1
+    d[MAX_COLS] = args.max_cols
     d[NO_PREFIX] = args.noprefix
     d[ROW_INDEX] = args.row_index
     d[QUOTECHAR] = args.quotechar
