@@ -10,6 +10,7 @@ python xlsx-conv.py -i "resources\Filtered.xlsx" -o "temp"
 python xlsx-conv.py -i "resources\Formulas.xlsx" -o "temp"
 python xlsx-conv.py -i "resources\Hidden.xlsx" -o "temp"
 python xlsx-conv.py -i "resources\MultipleSheets.xlsx" -o "temp"
+python xlsx-conv.py -i "resources\MultipleSheets.xlsx" -sheetnames
 python xlsx-conv.py -i "resources\Numbers.xlsx" -o "temp"
 python xlsx-conv.py -i "resources\Range.xlsx" -o "temp"
 REM other options

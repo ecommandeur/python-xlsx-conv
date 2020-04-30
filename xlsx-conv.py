@@ -1,11 +1,12 @@
 from openpyxl import load_workbook
-from openpyxl.utils import get_column_letter
 from time import strftime
 from itertools import islice
+from io import StringIO
 import argparse
 import csv
 import os
 import sys
+
 
 # ---
 # GET ARGUMENTS
@@ -17,11 +18,9 @@ parser.add_argument('-i','--input', help='Path to XLSX/XLSM/XLTX/XLTM file or pa
 parser.add_argument('-o','--outputDir', help='Path to output directory')
 parser.add_argument('--col_index', help='Generate column indices (c1,c2,etc) as first line in output', action="store_true")
 parser.add_argument('--delimiter', help='Delimiter used in output, defaults to ,', choices=[',', ';', '|', 'tab'], default=',')
-parser.add_argument('--encoding', help='Output encoding, defaults to utf-8', choices=['ascii', 'latin-1', 'utf-8', 'utf-16'], default='utf-8')
+parser.add_argument('--encoding', help='Output encoding, defaults to utf-8. Warning: ascii and latin-1 codecs cannot encode all characters that may be in Excel file and conversion will fail if the Excel file contains those characters.', choices=['ascii', 'latin-1', 'utf-8', 'utf-16'], default='utf-8')
 parser.add_argument('--extension', help='Extension of output, defaults to csv', default='csv')
 parser.add_argument('--linebreak_replacement', help='Replace linebreaks in cells by replacement string')
-# TODO add colrange e.g. 10:20 to convert only columns 10 to 20 (maybe also allow J:T ?)
-# TODO add rowrange e.g. 10:20 to convert only rows 10 to 20
 parser.add_argument('--max_cols', type=int, help="Maximum number of columns", default=-1)
 parser.add_argument('--noprefix', help='Do not prefix ouput with workbook name', action="store_true")
 parser.add_argument('--prefix', help='Use specified prefix instead of prefixing output with workbook name')
@@ -29,8 +28,7 @@ parser.add_argument('--row_index', help='Write row numbers as first column in ou
 parser.add_argument('--quotechar', help='One-character string used to quote fields containing special characters', default='"')
 parser.add_argument('--quoting', help='Controls field quoting, defaults to MINIMAL', choices=['ALL', 'MINIMAL', 'NONE', 'NONNUMERIC'], default='MINIMAL')
 parser.add_argument('--sheet', help='Name of sheet to convert')
-# TODO add option to echo sheetnames and maybe some metadata about sheets (sheetinfo)
-# print (wb.sheetnames)
+parser.add_argument('--sheetnames', help='Do not convert input, but echo sheetnames', action="store_true")
 parser.add_argument('--version', action='version', version="%(prog)s 1.4.0-beta")
 args = parser.parse_args()
 
@@ -57,8 +55,10 @@ NO_PREFIX = "noprefix"
 ROW_INDEX = "row_index"
 QUOTECHAR = "quotechar"
 QUOTING = "quoting"
+SHEETNAMES = "sheetnames"
 
 # derived
+INPUT_FILE = "inputfile"
 INPUT_BASE_FN = "inputbasefn"
 
 # ---
@@ -119,6 +119,7 @@ if inputExt.lower() == ".txt":
                 inputDict[PREFIX] = row[indexPrefix]
             else:
                 inputDict[PREFIX] = args.prefix
+            # sheet
             if indexSheet >= 0:
                 inputDict[SHEET] = row[indexSheet]
             else:
@@ -127,7 +128,6 @@ if inputExt.lower() == ".txt":
 
 if inputExt.lower() != ".txt":
     inputDict = {}
-    # input/output
     inputDict[INPUT_PATH] = inputPath
     inputDict[OUTPUT_DIR] = args.outputDir
     inputDict[PREFIX] = args.prefix
@@ -161,16 +161,16 @@ def convertSheet(ws,outputPath,argDict):
     rowIndex = argDict[ROW_INDEX]
     maxColumns = argDict[MAX_COLS]
     
+    # First check if there are rows in ws.rows 
+    # The sheet may be empty
+    first_row_slice = list(islice(ws.rows,1))
+    if len(first_row_slice) == 0:
+        print(strftime("%Y-%m-%d %H:%M:%S"), "- Skipping conversion of sheet", ws.title, "since it is empty.")
+        return
+
     with open(outputPath, 'w', encoding=outputEncoding) as f:
         c = csv.writer(f, lineterminator='\n', delimiter=outputDelimiter, quotechar=outputQuoteChar, quoting=quoteStyle)
         
-        # First check if there are rows in ws.rows 
-        # The sheet may be empty
-        first_row_slice = list(islice(ws.rows,1))
-        if len(first_row_slice) == 0:
-            print(strftime("%Y-%m-%d %H:%M:%S"), "- Skipped", ws.title, "since it is empty")
-            return
-
         first_row = first_row_slice[0]
         numcols = len(first_row)
         if maxColumns > -1:
@@ -218,7 +218,7 @@ def convertWorkbook(argDict):
     ws_names = wb.sheetnames
     if argDict[SHEET]:
         if(argDict[SHEET] in ws_names):
-            print(strftime("%Y-%m-%d %H:%M:%S"),' - Only extracting sheet', argDict[SHEET])
+            print(strftime("%Y-%m-%d %H:%M:%S"), "- Only extracting sheet", argDict[SHEET])
             ws_names = [argDict[SHEET]]
         else:
             print('Error: Cannot find sheet ', argDict[SHEET])
@@ -238,10 +238,34 @@ def convertWorkbook(argDict):
             print(e)
             sys.exit(1) 
 
+#
+# listSheetnames function
+#
+def listSheetnames(argDict):
+    inputPath = argDict[INPUT_PATH]
+    try:
+        wb = load_workbook(filename=inputPath, read_only=True)
+    except Exception as e:
+        print('Error: Failed to load workbook from', inputPath, '\n')
+        print(e)
+        sys.exit(1)
+
+    ws_names = wb.sheetnames
+    # forward slash is not allowed in Excel sheetname nor in Linux or Windows filename
+    for ws_name in ws_names:
+        l = [ws_name, argDict[INPUT_PATH]]
+        line = StringIO()
+        writer = csv.writer(line,lineterminator='\n', delimiter=",")
+        writer.writerow(l)
+        csvcontent = line.getvalue()
+        print(csvcontent, end = '')
 
 # ---
 # MAIN
 # --
+
+if args.sheetnames:
+    print("Sheet,Input")
 
 for d in inputList:
     # input
@@ -252,6 +276,13 @@ for d in inputList:
     inputDir, inputFile = os.path.split(realInputPath)
     inputBaseFn, inputExt = os.path.splitext(inputFile)
 
+    d[INPUT_FILE] = inputFile
+    d[INPUT_BASE_FN] = inputBaseFn
+
+    if args.sheetnames:
+        listSheetnames(d)
+        continue
+
     # output
     outputDir = d[OUTPUT_DIR]
     if not outputDir:
@@ -260,8 +291,6 @@ for d in inputList:
        print('Error: No such directory ', outputDir, '\n')
        sys.exit(1)
 
-    # enrich dict
-    d[INPUT_BASE_FN] = inputBaseFn
     d[OUTPUT_DIR] = outputDir
 
     # shared args
@@ -279,5 +308,5 @@ for d in inputList:
     # call convert workbook
     convertWorkbook(d)
 
-
-print(strftime("%Y-%m-%d %H:%M:%S"), "- Finished!")
+if not(args.sheetnames):
+    print(strftime("%Y-%m-%d %H:%M:%S"), "- Finished!")
