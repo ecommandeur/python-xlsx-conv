@@ -50,8 +50,48 @@ call FC temp\Characters.Characters.lr.csv resources\converted\Characters.Charact
 if %ERRORLEVEL%==1 goto failure
 if %ERRORLEVEL%==2 goto fcfailure
 REM #
+REM # Test noprefix
+REM # Output should be identical to automatically prefixed version
 REM #
+call python xlsx-conv.py -i "temp\Characters.xlsx" --noprefix
+call FC temp\Characters.csv resources\converted\Characters.Characters.csv
+if %ERRORLEVEL%==1 goto failure
+if %ERRORLEVEL%==2 goto fcfailure
 REM #
+REM # Test custom prefix
+REM # Output should be identical to automatically prefixed version
+REM #
+call python xlsx-conv.py -i "temp\Characters.xlsx" --prefix "CustomPrefix"
+call FC temp\CustomPrefix.Characters.csv resources\converted\Characters.Characters.csv
+if %ERRORLEVEL%==1 goto failure
+if %ERRORLEVEL%==2 goto fcfailure
+REM #
+REM # Test output dir
+REM #
+call python xlsx-conv.py -i "resources\Formulas.xlsx" --o "temp"
+call FC temp\Formulas.Formulas.csv resources\converted\Formulas.Formulas.csv
+if %ERRORLEVEL%==1 goto failure
+if %ERRORLEVEL%==2 goto fcfailure
+REM #
+REM # Test row and column index
+REM #
+call python xlsx-conv.py -i "resources\Formulas.xlsx" --o "temp" --col_index --row_index --extension "rc_index.csv"
+call FC temp\Formulas.Formulas.rc_index.csv resources\converted\Formulas.Formulas.rc_index.csv
+if %ERRORLEVEL%==1 goto failure
+if %ERRORLEVEL%==2 goto fcfailure
+REM #
+REM # Test max columns
+REM #
+call python xlsx-conv.py -i "resources\Formulas.xlsx" --o "temp" --col_index --row_index --max_cols 3 --extension "max3.csv"
+call FC temp\Formulas.Formulas.max3.csv resources\converted\Formulas.Formulas.max3.csv
+if %ERRORLEVEL%==1 goto failure
+if %ERRORLEVEL%==2 goto fcfailure
+REM #
+REM # Test TXT input
+REM #
+REM
+REM 
+REM
 REM # Use ERRORLEVEL to check run
 echo %ERRORLEVEL%
 if %ERRORLEVEL%==0 goto success

@@ -1,0 +1,7 @@
+c0,c1,c2,c3,c4,c5
+1,A,B,Chars,Chars comment,
+2,1,2,é,Latin small letter e with acute,&#233;
+3,2,4,ñ,,
+4,3,6,Σ,Greek Capital Letter Sigma cannot be encoded in latin-1,
+5,,,,,
+6,,12,,,
