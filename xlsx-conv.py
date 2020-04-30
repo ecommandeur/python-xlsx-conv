@@ -41,8 +41,8 @@ args = parser.parse_args()
 
 # arguments taken either from commandline or TXT input
 INPUT_PATH = "inputpath"
-INPUT_BASE_FN = "inputbasefn"
 OUTPUT_DIR = "outputdir"
+PREFIX = "prefix"
 SHEET = "sheet"
 
 # shared arguments
@@ -54,11 +54,12 @@ EXTENSION = "extension"
 LINEBREAK_REPLACEMENT = 'linebreak_replacement'
 MAX_COLS = 'max_cols'
 NO_PREFIX = "noprefix"
-PREFIX = "prefix"
 ROW_INDEX = "row_index"
 QUOTECHAR = "quotechar"
 QUOTING = "quoting"
 
+# derived
+INPUT_BASE_FN = "inputbasefn"
 
 # ---
 # ARGUMENT HANDLING
@@ -93,6 +94,7 @@ if inputExt.lower() == ".txt":
         lowerCaseHeaders = [h.lower() for h in headers]
         indexOutputDir = -1 # outputDir is optional
         indexPrefix = -1 # prefix is optional
+        indexSheet = -1 # sheet is optional
         if "input" in lowerCaseHeaders:
             indexInput = lowerCaseHeaders.index("input") # index method returns value error if value is not in list!
         else:
