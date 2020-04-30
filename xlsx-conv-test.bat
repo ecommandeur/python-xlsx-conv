@@ -88,7 +88,16 @@ if %ERRORLEVEL%==1 goto failure
 if %ERRORLEVEL%==2 goto fcfailure
 REM #
 REM # Test TXT input
+REM # clean test folder
 REM #
+call del /S /Q temp\*.*
+call python xlsx-conv.py -i "resources\Input_OutputDir.txt"
+call FC temp\C.Characters.csv resources\converted\Characters.Characters.csv
+if %ERRORLEVEL%==1 goto failure
+if %ERRORLEVEL%==2 goto fcfailure
+call FC temp\N.Numbers.csv resources\converted\Numbers.Numbers.csv
+if %ERRORLEVEL%==1 goto failure
+if %ERRORLEVEL%==2 goto fcfailure
 REM
 REM 
 REM
