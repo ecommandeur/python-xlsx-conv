@@ -21,7 +21,8 @@ parser.add_argument('--delimiter', help='Delimiter used in output, defaults to ,
 parser.add_argument('--encoding', help='Output encoding, defaults to utf-8. Warning: ascii and latin-1 codecs cannot encode all characters that may be in Excel file and conversion will fail if the Excel file contains those characters.', choices=['ascii', 'latin-1', 'utf-8', 'utf-16'], default='utf-8')
 parser.add_argument('--extension', help='Extension of output, defaults to csv', default='csv')
 parser.add_argument('--linebreak_replacement', help='Replace linebreaks in cells by replacement string')
-parser.add_argument('--max_cols', type=int, help="Maximum number of columns", default=-1)
+parser.add_argument('--max_cols', type=int, help="Maximum number of columns to convert", default=-1)
+parser.add_argument('--max_rows', type=int, help="Maximum number of rows to convert", default=-1)
 parser.add_argument('--noprefix', help='Do not prefix ouput with workbook name', action="store_true")
 parser.add_argument('--prefix', help='Use specified prefix instead of prefixing output with workbook name')
 parser.add_argument('--row_index', help='Write row numbers as first column in output', action="store_true")
@@ -51,6 +52,7 @@ ENCODING = "encoding"
 EXTENSION = "extension"
 LINEBREAK_REPLACEMENT = 'linebreak_replacement'
 MAX_COLS = 'max_cols'
+MAX_ROWS = 'max_rows'
 NO_PREFIX = "noprefix"
 ROW_INDEX = "row_index"
 QUOTECHAR = "quotechar"
@@ -160,6 +162,7 @@ def convertSheet(ws,outputPath,argDict):
     colIndex = argDict[COL_INDEX]
     rowIndex = argDict[ROW_INDEX]
     maxColumns = argDict[MAX_COLS]
+    maxRows = argDict[MAX_ROWS]
     
     # First check if there are rows in ws.rows 
     # The sheet may be empty
@@ -171,16 +174,15 @@ def convertSheet(ws,outputPath,argDict):
     with open(outputPath, 'w', encoding=outputEncoding) as f:
         c = csv.writer(f, lineterminator='\n', delimiter=outputDelimiter, quotechar=outputQuoteChar, quoting=quoteStyle)
         
-        first_row = first_row_slice[0]
-        numcols = len(first_row)
-        if maxColumns > -1:
+        # max_column gives the maximum column index containing data (1-based)
+        numcols = ws.max_column
+        if maxColumns > 0:
             if numcols > maxColumns:
                 numcols = maxColumns
                 print(strftime("%Y-%m-%d %H:%M:%S"), "- Limiting output to", numcols, "columns")
 
         # We iterate over range(numcols), e.g. range(3) will give [0,1,2]
         if colIndex == True:
-            first_row =  first_row_slice[0]
             col_index = []
             if rowIndex == True:
                 col_index.append("c0") # if row_index is also set then include additional column
@@ -189,8 +191,15 @@ def convertSheet(ws,outputPath,argDict):
                 col_index.append(c_val)
             c.writerow(col_index)
 
+        # max_row gives the maximum row index containing data (1-based)
+        numrows = ws.max_row
+        if maxRows > 0:
+            if numrows > maxRows:
+                numrows = maxRows
+                print(strftime("%Y-%m-%d %H:%M:%S"), "- Limiting output to", numrows, "rows")
+
         print(strftime("%Y-%m-%d %H:%M:%S"), "- Outputting converted sheet to", outputPath)
-        for index, row in enumerate(ws.rows):
+        for index, row in enumerate(ws.iter_rows(max_row=numrows)):
             values = []
             if rowIndex == True:
                 values.append(index+1)
@@ -250,8 +259,8 @@ def listSheetnames(argDict):
         print(e)
         sys.exit(1)
 
+    # write sheetnames as csv
     ws_names = wb.sheetnames
-    # forward slash is not allowed in Excel sheetname nor in Linux or Windows filename
     for ws_name in ws_names:
         l = [ws_name, argDict[INPUT_PATH]]
         line = StringIO()
@@ -300,6 +309,7 @@ for d in inputList:
     d[EXTENSION] = args.extension
     d[LINEBREAK_REPLACEMENT] = args.linebreak_replacement
     d[MAX_COLS] = args.max_cols
+    d[MAX_ROWS] = args.max_rows
     d[NO_PREFIX] = args.noprefix
     d[ROW_INDEX] = args.row_index
     d[QUOTECHAR] = args.quotechar
