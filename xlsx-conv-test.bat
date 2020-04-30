@@ -91,8 +91,16 @@ if %ERRORLEVEL%==2 goto fcfailure
 REM #
 REM # Test max columns
 REM #
-call python xlsx-conv.py -i "resources\Formulas.xlsx" --o "temp" --col_index --row_index --max_cols 3 --extension "max3.csv"
-call FC temp\Formulas.Formulas.max3.csv resources\converted\Formulas.Formulas.max3.csv
+call python xlsx-conv.py -i "resources\Formulas.xlsx" --o "temp" --col_index --row_index --max_cols 3 --extension "max_cols3.csv"
+call FC temp\Formulas.Formulas.max_cols3.csv resources\converted\Formulas.Formulas.max_cols3.csv
+if %ERRORLEVEL%==1 goto failure
+if %ERRORLEVEL%==2 goto fcfailure
+
+REM #
+REM # Test max rows
+REM #
+call python xlsx-conv.py -i "resources\Formulas.xlsx" --o "temp" --col_index --row_index --max_rows 2 --extension "max_rows2.csv"
+call FC temp\Formulas.Formulas.max_rows2.csv resources\converted\Formulas.Formulas.max_rows2.csv
 if %ERRORLEVEL%==1 goto failure
 if %ERRORLEVEL%==2 goto fcfailure
 
@@ -144,12 +152,12 @@ if %ERRORLEVEL%==2 goto fcfailure
 REM #
 REM # Test TXT input
 REM #
-call python xlsx-conv.py -i "resources\Input_Sheet.txt" --noprefix --col_index --row_index --max_cols 4 --extension "max4.csv"
-call dir /B "temp\Sheet1.max4.csv"
+call python xlsx-conv.py -i "resources\Input_Sheet.txt" --noprefix --col_index --row_index --max_cols 4 --extension "max_cols4.csv"
+call dir /B "temp\Sheet1.max_cols4.csv"
 if %ERRORLEVEL%==0 goto failure
-call dir /B "temp\Sheet2.max4.csv"
+call dir /B "temp\Sheet2.max_cols4.csv"
 if %ERRORLEVEL%==1 goto failure
-call FC temp\Sheet2.max4.csv resources\converted\MultipleSheets.Sheet2.max4.csv
+call FC temp\Sheet2.max_cols4.csv resources\converted\MultipleSheets.Sheet2.max_cols4.csv
 if %ERRORLEVEL%==1 goto failure
 if %ERRORLEVEL%==2 goto fcfailure
 
