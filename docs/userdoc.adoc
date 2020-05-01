@@ -8,8 +8,52 @@ Run xlsx-conv with -h to get help on the commandline options that xlsx-conv has.
  $ xlsx-conv -h
 ----
 
-== FAQ
+== Examples
 
-=== What does the warning "UserWarning: Discarded range with reserved name" mean?
+At the minimum, xlsx-conv requires an input.
+The input can be a path to an XLSX/XLSM/XLTX or XLTM file.
 
-See http://stackoverflow.com/questions/30169149/what-causes-userwarning-discarded-range-with-reserved-name-openpyxl[this answser at StackOverflow] : "It's supposed to be a friendly warning letting you know that some of the defined names are being lost when reading the file. Warnings in Python are not exceptions but informational notices." 
+----
+> xlsx-conv -i "resources\MultipleSheets.xlsx"
+----
+
+The input can also be a text file specifying paths to one or more XLSX/XLSM/XLTX or XLTM files
+
+----
+> xlsx-conv -i "resources\Input.txt"
+----
+
+Where Input.txt may looks like
+
+----
+Input
+temp\Characters.xlsx
+temp\Numbers.xlsx
+----
+
+If only the input is specified then the output will be written in the same directory as the input.
+Also, by default each sheet that is converted will be prefixed by the name of the input. E.g. If MultipleSheets.xlsx contains two sheets named Sheet1 and Sheet2 then by default the ouput will be
+
+----
+MultipleSheets.Sheet1.csv
+MultipleSheets.Sheet1.csv
+----
+
+If we want to have the output in different directory than we can set the outputDir.
+
+----
+> xlsx-conv -i "resources\MultipleSheets.xlsx" -o temp
+----
+
+The prefix for the output can be manipulated via `--noprefix` and `--prefix`. The `--noprefix` option will just use the sheet names and the `--prefix` option can be used to set a custom prefix.
+
+----
+> xlsx-conv -i "resources\MultipleSheets.xlsx" -o temp --prefix MyPrefix
+----
+
+This would output
+
+----
+MyPrefix.Sheet1.csv
+MyPrefix.Sheet1.csv
+----

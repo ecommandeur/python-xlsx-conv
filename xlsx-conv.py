@@ -1,11 +1,13 @@
+from io import StringIO
+from itertools import islice
 from openpyxl import load_workbook
 from time import strftime
-from itertools import islice
-from io import StringIO
+
 import argparse
 import csv
 import os
 import sys
+import warnings
 
 
 # ---
@@ -289,7 +291,11 @@ for d in inputList:
     d[INPUT_BASE_FN] = inputBaseFn
 
     if args.sheetnames:
+        # OpenPyXL will give warnings if the Excel contains OOXML extensions that it does not support
+        # For the purpose of converting the data to a delimiter separated text file we can ignore these warnings
+        warnings.simplefilter("ignore")
         listSheetnames(d)
+        warnings.simplefilter("default")
         continue
 
     # output
@@ -316,7 +322,11 @@ for d in inputList:
     d[QUOTING] = args.quoting
 
     # call convert workbook
+    # OpenPyXL will give warnings if the Excel contains OOXML extensions that it does not support
+    # For the purpose of converting the data to a delimiter separated text file we can ignore these warnings
+    warnings.simplefilter("ignore")
     convertWorkbook(d)
+    warnings.simplefilter("default")
 
 if not(args.sheetnames):
     print(strftime("%Y-%m-%d %H:%M:%S"), "- Finished!")
