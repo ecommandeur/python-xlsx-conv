@@ -195,3 +195,16 @@ Make sure to first activate the conda environment for xlsx-conv. In the root of 
 ----
 > pyinstaller -F xlsx-conv.py
 ----
+
+== Testing xlsx-conv
+
+At moment the command-line client is tested using a Windows batch script. We want to know if the actual command-line calls give the expected output. This is done by testing against output that is known to be correct and utilizing built in Windows commands.
+
+First activate the conda environment to load dependencies and then run the test suite.
+
+----
+> activate xslx-conv
+> xlsx-conv-test.bat
+----
+
+A succesful test should end in TEST PASSED.

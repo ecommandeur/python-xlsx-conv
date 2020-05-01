@@ -105,6 +105,14 @@ if %ERRORLEVEL%==1 goto failure
 if %ERRORLEVEL%==2 goto fcfailure
 
 REM #
+REM # Test max columns + max rows
+REM #
+call python xlsx-conv.py -i "resources\Formulas.xlsx" --o "temp" --col_index --row_index --max_cols 3 --max_rows 2 --extension "max_3x2.csv"
+call FC temp\Formulas.Formulas.max_3x2.csv resources\converted\Formulas.Formulas.max_3x2.csv
+if %ERRORLEVEL%==1 goto failure
+if %ERRORLEVEL%==2 goto fcfailure
+
+REM #
 REM # Test encoding
 REM # ascii and latin-1 will fail on Formulas.xlsx because some characters cannot be encoded in ascii / latin-1
 REM # FC will give Resync Failed.  Files are too different. when comparing to UTF-8

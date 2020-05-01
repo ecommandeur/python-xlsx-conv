@@ -32,13 +32,15 @@ parser.add_argument('--quotechar', help='One-character string used to quote fiel
 parser.add_argument('--quoting', help='Controls field quoting, defaults to MINIMAL', choices=['ALL', 'MINIMAL', 'NONE', 'NONNUMERIC'], default='MINIMAL')
 parser.add_argument('--sheet', help='Name of sheet to convert')
 parser.add_argument('--sheetnames', help='Do not convert input, but echo sheetnames', action="store_true")
-parser.add_argument('--version', action='version', version="%(prog)s 1.4.0-beta")
+parser.add_argument('--version', action='version', version="%(prog)s 1.4.0")
+parser.add_argument('--warnings', help='Show user warnings from OpenPyXL. By default these are suppressed. OpenPyXL warns about OOXML extensions it does not support. These unsupported extensions should not impact extracting raw data.', action="store_true")
 args = parser.parse_args()
 
 # ---
 # CONSTANTS
 # ---
-# used as keys in arg dictionary
+# Used as keys in argument dictionary
+# An argument dictionary is passed around over using global variables
 
 # arguments taken either from commandline or TXT input
 INPUT_PATH = "inputpath"
@@ -96,9 +98,10 @@ if inputExt.lower() == ".txt":
         csv_reader = csv.reader(tsv_file, delimiter='\t')
         headers = next(csv_reader,[])
         lowerCaseHeaders = [h.lower() for h in headers]
-        indexOutputDir = -1 # outputDir is optional
-        indexPrefix = -1 # prefix is optional
-        indexSheet = -1 # sheet is optional
+        # initialize ndex for optional arguments
+        indexOutputDir = -1 
+        indexPrefix = -1 
+        indexSheet = -1 
         if "input" in lowerCaseHeaders:
             indexInput = lowerCaseHeaders.index("input") # index method returns value error if value is not in list!
         else:
@@ -249,6 +252,7 @@ def convertWorkbook(argDict):
             print('Error: Failed to convert sheet\n')
             print(e)
             sys.exit(1)
+
     # all ready, close the workbook
     wb.close()
 
@@ -274,6 +278,9 @@ def listSheetnames(argDict):
         csvcontent = line.getvalue()
         print(csvcontent, end = '')
 
+    # all ready, close the workbook
+    wb.close()
+
 # ---
 # MAIN
 # --
@@ -284,7 +291,8 @@ if args.sheetnames:
 for d in inputList:
     # OpenPyXL will issue warnings if the Excel contains OOXML extensions that it does not support
     # For the purpose of converting the data to a delimiter separated text file we can ignore these warnings
-    warnings.simplefilter("ignore")
+    if not(args.warnings):
+        warnings.simplefilter("ignore")
 
     # input
     realInputPath = os.path.realpath(d[INPUT_PATH])

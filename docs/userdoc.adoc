@@ -5,7 +5,7 @@ xlsx-conv is a commandline application for converting XLSX files to plain text d
 Run xlsx-conv with -h to get help on the commandline options that xlsx-conv has.
 
 ----
- $ xlsx-conv -h
+ > xlsx-conv -h
 ----
 
 == Examples
