@@ -173,6 +173,7 @@ def convertSheet(ws,outputPath,argDict):
         print(strftime("%Y-%m-%d %H:%M:%S"), "- Skipping conversion of sheet", ws.title, "since it is empty.")
         return
 
+    # The with statement automatically takes care of closing the file
     with open(outputPath, 'w', encoding=outputEncoding) as f:
         c = csv.writer(f, lineterminator='\n', delimiter=outputDelimiter, quotechar=outputQuoteChar, quoting=quoteStyle)
         
@@ -247,7 +248,9 @@ def convertWorkbook(argDict):
         except Exception as e:
             print('Error: Failed to convert sheet\n')
             print(e)
-            sys.exit(1) 
+            sys.exit(1)
+    # all ready, close the workbook
+    wb.close()
 
 #
 # listSheetnames function
@@ -279,6 +282,10 @@ if args.sheetnames:
     print("Sheet,Input")
 
 for d in inputList:
+    # OpenPyXL will issue warnings if the Excel contains OOXML extensions that it does not support
+    # For the purpose of converting the data to a delimiter separated text file we can ignore these warnings
+    warnings.simplefilter("ignore")
+
     # input
     realInputPath = os.path.realpath(d[INPUT_PATH])
     if not os.path.isfile(realInputPath):
@@ -291,11 +298,7 @@ for d in inputList:
     d[INPUT_BASE_FN] = inputBaseFn
 
     if args.sheetnames:
-        # OpenPyXL will give warnings if the Excel contains OOXML extensions that it does not support
-        # For the purpose of converting the data to a delimiter separated text file we can ignore these warnings
-        warnings.simplefilter("ignore")
         listSheetnames(d)
-        warnings.simplefilter("default")
         continue
 
     # output
@@ -322,11 +325,7 @@ for d in inputList:
     d[QUOTING] = args.quoting
 
     # call convert workbook
-    # OpenPyXL will give warnings if the Excel contains OOXML extensions that it does not support
-    # For the purpose of converting the data to a delimiter separated text file we can ignore these warnings
-    warnings.simplefilter("ignore")
     convertWorkbook(d)
-    warnings.simplefilter("default")
 
 if not(args.sheetnames):
     print(strftime("%Y-%m-%d %H:%M:%S"), "- Finished!")

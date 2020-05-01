@@ -39,7 +39,7 @@ MultipleSheets.Sheet1.csv
 MultipleSheets.Sheet1.csv
 ----
 
-If we want to have the output in different directory than we can set the outputDir.
+If you want to have the output in a different directory than you can set the outputDir.
 
 ----
 > xlsx-conv -i "resources\MultipleSheets.xlsx" -o temp
