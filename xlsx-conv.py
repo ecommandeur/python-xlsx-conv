@@ -32,7 +32,8 @@ parser.add_argument('--quotechar', help='One-character string used to quote fiel
 parser.add_argument('--quoting', help='Controls field quoting, defaults to MINIMAL', choices=['ALL', 'MINIMAL', 'NONE', 'NONNUMERIC'], default='MINIMAL')
 parser.add_argument('--sheet', help='Name of sheet to convert')
 parser.add_argument('--sheetnames', help='Do not convert input, but echo sheetnames', action="store_true")
-parser.add_argument('--version', action='version', version="%(prog)s 1.5.0-snapshot")
+parser.add_argument('--version', action='version', version="%(prog)s 1.5.0")
+parser.add_argument('--tab_replacement', help='Replace linebreaks in cells by replacement string')
 parser.add_argument('--warnings', help='Show user warnings from OpenPyXL. By default these are suppressed. OpenPyXL warns about OOXML extensions it does not support. These unsupported extensions should not impact extracting raw data.', action="store_true")
 args = parser.parse_args()
 
@@ -62,6 +63,7 @@ ROW_INDEX = "row_index"
 QUOTECHAR = "quotechar"
 QUOTING = "quoting"
 SHEETNAMES = "sheetnames"
+TAB_REPLACEMENT = 'tab_replacement'
 
 # derived
 INPUT_FILE = "inputfile"
@@ -160,14 +162,15 @@ def convertSheet(ws,outputPath,argDict):
     elif quoting == "NONNUMERIC":
       quoteStyle = csv.QUOTE_NONNUMERIC
 
+    colIndex = argDict[COL_INDEX]
+    linebreakReplacement = argDict[LINEBREAK_REPLACEMENT]
+    maxColumns = argDict[MAX_COLS]
+    maxRows = argDict[MAX_ROWS]
     outputEncoding = argDict[ENCODING]
     outputDelimiter = argDict[DELIMITER]
     outputQuoteChar = argDict[QUOTECHAR]
-    linebreakReplacement = argDict[LINEBREAK_REPLACEMENT]
-    colIndex = argDict[COL_INDEX]
     rowIndex = argDict[ROW_INDEX]
-    maxColumns = argDict[MAX_COLS]
-    maxRows = argDict[MAX_ROWS]
+    tabReplacement = argDict[TAB_REPLACEMENT]
     
     # First check if there are rows in ws.rows 
     # The sheet may be empty
@@ -214,6 +217,8 @@ def convertSheet(ws,outputPath,argDict):
                 value = cell.value
                 if linebreakReplacement is not None and isinstance(value, str):
                     value = value.replace('\r\n', linebreakReplacement).replace('\n', linebreakReplacement).replace('\r', linebreakReplacement)
+                if tabReplacement is not None and isinstance(value, str):
+                    value = value.replace('\t', tabReplacement)
                 values.append(value)
             c.writerow(values)
 
@@ -329,6 +334,7 @@ for d in inputList:
     d[MAX_ROWS] = args.max_rows
     d[NO_PREFIX] = args.noprefix
     d[ROW_INDEX] = args.row_index
+    d[TAB_REPLACEMENT] = args.tab_replacement
     d[QUOTECHAR] = args.quotechar
     d[QUOTING] = args.quoting
 

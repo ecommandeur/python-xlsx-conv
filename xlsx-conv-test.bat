@@ -55,6 +55,14 @@ if %ERRORLEVEL%==1 goto failure
 if %ERRORLEVEL%==2 goto fcfailure
 
 REM #
+REM # Test tab replacement
+REM #
+call python xlsx-conv.py -i "temp\Characters.xlsx" --linebreak_replacement " " --tab_replacement " " --extension "tr.csv"
+call FC temp\Characters.Characters.lr.csv resources\converted\Characters.Characters.lr.csv
+if %ERRORLEVEL%==1 goto failure
+if %ERRORLEVEL%==2 goto fcfailure
+
+REM #
 REM # Test noprefix
 REM # Output should be identical to automatically prefixed version
 REM #
