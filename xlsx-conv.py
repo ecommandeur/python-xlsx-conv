@@ -32,7 +32,7 @@ parser.add_argument('--quotechar', help='One-character string used to quote fiel
 parser.add_argument('--quoting', help='Controls field quoting, defaults to MINIMAL', choices=['ALL', 'MINIMAL', 'NONE', 'NONNUMERIC'], default='MINIMAL')
 parser.add_argument('--sheet', help='Name of sheet to convert')
 parser.add_argument('--sheetnames', help='Do not convert input, but echo sheetnames', action="store_true")
-parser.add_argument('--version', action='version', version="%(prog)s 1.5.0")
+parser.add_argument('--version', action='version', version="%(prog)s 1.6.0-beta")
 parser.add_argument('--tab_replacement', help='Replace linebreaks in cells by replacement string')
 parser.add_argument('--warnings', help='Show user warnings from OpenPyXL. By default these are suppressed. OpenPyXL warns about OOXML extensions it does not support. These unsupported extensions should not impact extracting raw data.', action="store_true")
 args = parser.parse_args()
